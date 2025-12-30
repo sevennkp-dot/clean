@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>แอพซักผ้า</title>
+
+<style>
+:root{
+  --primary:#2563eb;
+  --primary-soft:#e0e7ff;
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#111827;
+  --sub:#6b7280;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#dc2626;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);}
+.app{max-width:430px;margin:auto;min-height:100vh;display:flex;flex-direction:column;position:relative;}
+.header{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:20px 16px 26px;position:relative;border-bottom-left-radius:24px;border-bottom-right-radius:24px;}
+.header h1{margin:0;font-size:20px;font-weight:700;}
+.header p{margin:6px 0 0;font-size:13px;opacity:.9;}
+.status-floating{position:absolute;top:16px;right:16px;background:var(--primary-soft);color:var(--primary);padding:12px 16px;border-radius:16px;font-size:12px;display:flex;flex-direction:column;align-items:flex-end;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.status-floating input{width:150px;margin-bottom:6px;padding:8px;border-radius:10px;border:1px solid #d1d5db;font-size:12px;}
+.status-floating button{padding:8px 12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;}
+.status-floating button:hover{background:#1e40af;}
+.status-floating p{margin:6px 0 0;font-size:12px;color:var(--sub);}
+.content{padding:20px;flex:1;}
+.step{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--sub);margin-bottom:12px;}
+.step span{width:26px;height:26px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.card{background:var(--card);border-radius:20px;padding:20px;margin-bottom:18px;box-shadow:0 12px 28px rgba(0,0,0,.08);transition:.3s;}
+.card:hover{box-shadow:0 14px 32px rgba(0,0,0,.12);}
+input,select,button{width:100%;padding:14px;border-radius:16px;border:1px solid #e5e7eb;margin-bottom:12px;font-size:14px;transition:.2s;}
+input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.2);}
+.toggle{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed #e5e7eb;transition:.2s;}
+.toggle:last-child{border-bottom:none;}
+.switch{position:relative;width:50px;height:26px;}
+.switch input{display:none;}
+.slider{position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:.3s;}
+.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.switch input:checked + .slider{background:var(--primary);} 
+.switch input:checked + .slider:before{transform:translateX(24px);} 
+.footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:16px 18px;box-shadow:0 -4px 12px rgba(0,0,0,.05);} 
+.summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:600;font-size:15px;} 
+button.action{background:var(--primary);color:#fff;font-size:16px;font-weight:700;border:none;padding:14px;border-radius:18px;cursor:pointer;transition:.3s;}
+button.action:hover{background:#1d4ed8;}
+.detail{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;}
+.softener-gallery{display:flex;gap:12px;margin-top:12px;}
+.softener-gallery img{width:84px;height:84px;border-radius:14px;object-fit:cover;border:2px solid #e5e7eb;cursor:pointer;transition:.3s;} 
+.softener-gallery img.active{border-color:var(--primary);transform:scale(1.08);}
+#washAlert{transition:.3s;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <h1>🧺 บริการซักผ้าเดลิเวอรี่</h1>
+  <p>สะดวก รวดเร็ว • ราคาชัดเจน • มืออาชีพ</p>
+
+  <div class="status-floating">
+    <input type="text" id="statusName" placeholder="ชื่อที่ใช้สั่ง">
+    <input type="tel" id="statusPhone" placeholder="เบอร์โทรศัพท์">
+    <button type="button" id="checkStatus">🔎 ตรวจสอบสถานะ</button>
+    <p id="orderStatus">สถานะ: —</p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="step"><span>1</span>วิธีซัก</div>
+  <div class="card">
+    <div class="toggle"><span>ซักรวม (มาตรฐาน)</span>
+      <label class="switch"><input type="radio" name="washType" value="รวม" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle"><span>แยกสี (ปลอดภัยกว่า) +30 บาท</span>
+      <label class="switch"><input type="radio" name="washType" value="แยก"><span class="slider"></span></label>
+    </div>
+    <div id="washAlert" style="display:none;font-size:12px;color:var(--warning);background:#fef3c7;padding:10px;border-radius:12px;margin-top:10px;">⚠️ มีค่าบริการเพิ่มสำหรับการแยกสี เพื่อป้องกันสีตก</div>
+  </div>
+
+  <div class="step"><span>2</span>ข้อมูลลูกค้า</div>
+  <div class="card">
+    <input type="text" id="custName" placeholder="ชื่อ – นามสกุล">
+    <input type="tel" id="custPhone" placeholder="เบอร์โทรศัพท์">
+    <input type="text" id="custAddress" placeholder="ที่อยู่รับ–ส่ง">
+    <button type="button" id="getLocation">📍 รับพิกัดปัจจุบัน</button>
+    <input type="text" id="custLocation" placeholder="พิกัดรับ–ส่ง" readonly>
+    <input type="date" id="pickupDate" placeholder="วันรับผ้า">
+  </div>
+
+  <div class="step"><span>3</span>เลือกขนาดเครื่องซัก</div>
+  <div class="card">
+    <select id="machine">
+      <option value="" selected disabled>กรุณาเลือกขนาดเครื่องซัก</option>
+      <option value="40">เครื่องเล็ก (7–8 กก.) — 40 บาท</option>
+      <option value="60">เครื่องกลาง (10–12 กก.) — 60 บาท</option>
+      <option value="80">เครื่องใหญ่ (14–16 กก.) — 80 บาท</option>
+    </select>
+  </div>
+
+  <div class="step" id="serviceStep" style="display:none;"><span>4</span>บริการเพิ่มเติม</div>
+  <div class="card" id="extraServices" style="display:none;">
+    <div class="toggle"><span id="ironLabel">รีด</span><label class="switch"><input type="checkbox" id="iron"><span class="slider"></span></label></div>
+    <div class="toggle"><span>ซักด่วน (+40%)</span><label class="switch"><input type="checkbox" id="express"><span class="slider"></span></label></div>
+    <div class="toggle"><span>น้ำยาปรับผ้านุ่ม (+10)</span><label class="switch"><input type="checkbox" id="perfume"><span class="slider"></span></label></div>
+    <div id="softenerOptions" style="display:none;padding:10px 0 0 0;">
+      <select id="softenerBrand">
+        <option value="">เลือกยี่ห้อ</option>
+        <option value="Downy">Downy</option>
+        <option value="Comfort">Comfort</option>
+        <option value="Breeze">Breeze</option>
+      </select>
+      <select id="softenerScent">
+        <option value="">เลือกกลิ่น</option>
+        <option value="ซากุระ">ซากุระ</option>
+        <option value="ลาเวนเดอร์">ลาเวนเดอร์</option>
+        <option value="ฟลอรัล">ฟลอรัล</option>
+        <option value="ไร้กลิ่น">ไร้กลิ่น</option>
+      </select>
+    </div>
+    <div class="toggle"><span>พับผ้า (+20)</span><label class="switch"><input type="checkbox" id="fold"><span class="slider"></span></label></div>
+    <div class="toggle"><span>รับ–ส่งด่วน (+30)</span><label class="switch"><input type="checkbox" id="deliveryFast"><span class="slider"></span></label></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="summary"><span>ราคารวม (รวมค่าส่ง 20 บาท)</span><strong id="result">—</strong></div>
+  <button class="action" onclick="calculate()">ยืนยัน & คำนวณราคา</button>
+  <div class="detail" id="priceDetail"></div>
+</div>
+
+</div>
+
+<script>
+function getIronPrice(m){return m===40?30:m===60?40:m===80?50:30;}
+function updateIronLabel(){const m=parseFloat(machine.value)||0;const p=getIronPrice(m);ironLabel.innerText=p?`รีด (+${p})`:'รีด';}
+document.querySelectorAll('input[name="washType"]').forEach(r=>{r.addEventListener('change',()=>{washAlert.style.display=r.value==='แยก'?'block':'none';});});
+machine.addEventListener('change',()=>{updateIronLabel();extraServices.style.display='block';serviceStep.style.display='flex';});
+perfume.addEventListener('change',()=>{softenerOptions.style.display=perfume.checked?'block':'none';});
+document.querySelectorAll('.softener-gallery img').forEach(img=>{img.addEventListener('click',()=>{document.querySelectorAll('.softener-gallery img').forEach(i=>i.classList.remove('active'));img.classList.add('active');softenerBrand.value=img.dataset.brand;});});
+getLocation.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{custLocation.value=`${pos.coords.latitude},${pos.coords.longitude}`;},err=>{alert('ไม่สามารถรับพิกัดได้');});} else { alert('อุปกรณ์ของคุณไม่รองรับการระบุตำแหน่ง'); }});
+
+function calculate(){
+  if(!custName.value||!custPhone.value||!custAddress.value||!pickupDate.value){alert('กรุณากรอกข้อมูลลูกค้าให้ครบถ้วน');return;}
+  if(!machine.value){alert('กรุณาเลือกขนาดเครื่องซัก');return;}
+  const m=parseFloat(machine.value);
+  let total=0;
+  let d=[];
+  total+=m; d.push(`เครื่องซัก ${m}`);
+  total+=20; d.push('ค่าส่ง +20');
+  if(document.querySelector('input[name="washType"]:checked').value==='แยก'){total+=30;d.push('แยกสี +30');}
+  if(iron.checked){const p=getIronPrice(m);total+=p;d.push(`รีด +${p}`);}
+  if(perfume.checked){total+=10;const b=softenerBrand.value||'ไม่ระบุยี่ห้อ';const s=softenerScent.value||'ไม่ระบุกลิ่น';d.push(`น้ำยาปรับผ้านุ่ม +10 (${b} • ${s})`);}
+  if(fold.checked){total+=20;d.push('พับผ้า +20');}
+  if(deliveryFast.checked){total+=30;d.push('รับ–ส่งด่วน +30');}
+  if(express.checked){total*=1.4;d.push('ซักด่วน +40%');}
+  result.innerText=`฿${total.toFixed(0)}`;
+  priceDetail.innerText=`👤 ${custName.value} | 📞 ${custPhone.value} | 📍 ${custLocation.value} | 📅 ${pickupDate.value}
+`+d.join(' • ');
+}
+
+checkStatus.addEventListener('click',()=>{
+  const name=statusName.value.trim();
+  const phone=statusPhone.value.trim();
+  if(!name||!phone){alert('กรุณากรอกชื่อและเบอร์โทรเพื่อเช็คสถานะ');return;}
+  const statuses = ['รอรับผ้า', 'กำลังซัก', 'ซักเสร็จ', 'จัดส่ง', 'ส่งถึงลูกค้า'];
+  const randomStatus = statuses[Math.floor(Math.random()*statuses.length)];
+  orderStatus.innerText = `สถานะออเดอร์ของ ${name} (${phone}): ${randomStatus}`;
+});
+</script>
+</body>
+</html>
