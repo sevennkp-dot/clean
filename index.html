@@ -70,6 +70,7 @@ button.secondary{background:#eef2ff;color:var(--primary)}
     <div class="header">
       <h1>🧺 ซักผ้าเดลิเวอรี่</h1>
       <p>กรอกข้อมูล → คำนวณราคา → บันทึกออเดอร์</p>
+      <div id="orderMeta" class="muted" style="margin-top:6px"></div>
     </div>
 
     <div class="card">
@@ -103,10 +104,11 @@ button.secondary{background:#eef2ff;color:var(--primary)}
     <div class="card">
       <h2>4. ขนาดเครื่องซัก</h2>
       <select id="machine">
-        <option value="เล็ก">เล็ก (80 บาท)</option>
-        <option value="กลาง">กลาง (120 บาท)</option>
-        <option value="ใหญ่">ใหญ่ (160 บาท)</option>
+        <option value="เล็ก">เล็ก (9 กิโล • 80 บาท)</option>
+        <option value="กลาง">กลาง (14 กิโล • 120 บาท)</option>
+        <option value="ใหญ่">ใหญ่ (18 กิโล • 160 บาท)</option>
       </select>
+      <small class="muted">* 9 กก. = เครื่องเล็ก, 14 กก. = เครื่องกลาง, 18 กก. = เครื่องใหญ่</small>
     </div>
 
     <div class="card">
@@ -165,6 +167,18 @@ button.secondary{background:#eef2ff;color:var(--primary)}
 </div>
 
 <script>
+// ===============================
+// SUPABASE INIT (SAFE, DECLARE ONCE)
+// ===============================
+const SUPABASE_URL = "https://nqceenmwedhqpxakjoiq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xY2Vlbm13ZWRocXB4YWtqb2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMjA2NTYsImV4cCI6MjA4MjY5NjY1Nn0.OD0eEvgj6Qklan43iLmUyjj73oAQ_0qX1ZYN5z6kUNs";
+
+// ป้องกันการประกาศซ้ำ (แก้ error Identifier 'supabase' has already been declared)
+const sb = window.__sb || (window.__sb = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+));
+
 (function(){
   const goOrder=document.getElementById('goOrder');
   const goStatus=document.getElementById('goStatus');
@@ -186,6 +200,26 @@ button.secondary{background:#eef2ff;color:var(--primary)}
   }
 
   const prices={machine:{เล็ก:80,กลาง:120,ใหญ่:160}};
+
+  // ===== Order ID & Time =====
+  function generateOrderId(){
+    const d=new Date();
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    const t=Date.now().toString().slice(-4);
+    return `WASH-${y}${m}${day}-${t}`;
+  }
+  function formatDateTime(){
+    const d=new Date();
+    return d.toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
+  }
+  const orderId=generateOrderId();
+  const orderTime=formatDateTime();
+  const orderMeta=document.getElementById('orderMeta');
+  if(orderMeta){
+    orderMeta.textContent=`เลขออเดอร์: ${orderId} • เวลา: ${orderTime}`;
+  }
   const washTypeEl=document.getElementById('washType');
   const machineSel=document.getElementById('machine');
   const softener=document.getElementById('softener');
@@ -265,7 +299,72 @@ button.secondary{background:#eef2ff;color:var(--primary)}
       });
     }
   }
+  // ===============================
+  // SAVE ORDER TO SUPABASE
+  // ===============================
+  const btnSubmit = document.getElementById('btnSubmit');
+  if(btnSubmit){
+    btnSubmit.onclick = async ()=>{
+      const payload = {
+        order_id: orderId,
+        order_time: new Date(),
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        lat: document.getElementById('lat').value || null,
+        lng: document.getElementById('lng').value || null,
+        pickup_date: document.getElementById('pickup_date').value,
+        pickup_time: document.getElementById('pickup_time').value,
+        wash_type: washTypeEl.value,
+        machine_size: machineSel.value,
+        softener: softener.checked,
+        softener_brand: softenerBrand,
+        softener_scent: softenerScent,
+        iron: iron.checked,
+        fold: fold.checked,
+        fast_delivery: fastDelivery.checked,
+        total_price: parseInt(totalEl.textContent,10),
+        status: 'รับออเดอร์'
+      };
+
+      const { error } = await sb.from('orders').insert([payload]);
+      if(error){
+        alert('❌ บันทึกออเดอร์ไม่สำเร็จ');
+        console.error(error);
+      }else{
+        alert('✅ บันทึกออเดอร์เรียบร้อย\nเลขออเดอร์: '+orderId);
+      }
+    }
+  }
+
+  // ===============================
+  // CHECK STATUS BY PHONE
+  // ===============================
+  const btnCheckStatus = document.getElementById('btnCheckStatus');
+  if(btnCheckStatus){
+    btnCheckStatus.onclick = async ()=>{
+      const phone = document.getElementById('statusPhone').value;
+      const { data, error } = await sb
+        .from('orders')
+        .select('order_id,status,total_price,order_time')
+        .eq('phone', phone)
+        .order('created_at', { ascending:false })
+        .limit(1);
+
+      if(error || !data || !data.length){
+        alert('ไม่พบออเดอร์');
+        return;
+      }
+      const o = data[0];
+      alert(
+        `เลขออเดอร์: ${o.order_id}\n`+
+        `สถานะ: ${o.status}\n`+
+        `ยอดรวม: ${o.total_price} บาท`
+      );
+    }
+  }
 })();
 </script>
 </body>
 </html>
+
