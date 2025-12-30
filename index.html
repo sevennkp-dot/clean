@@ -1,175 +1,227 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>แอพซักผ้า</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>เว็บแอพซักผ้าเดลิเวอรี่</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --primary:#2563eb;
-  --primary-soft:#e0e7ff;
+  --primary-dark:#1e40af;
   --bg:#f5f7fb;
   --card:#ffffff;
   --text:#111827;
-  --sub:#6b7280;
-  --success:#16a34a;
-  --warning:#f59e0b;
-  --danger:#dc2626;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --radius:16px;
 }
-*{box-sizing:border-box;}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);}
-.app{max-width:430px;margin:auto;min-height:100vh;display:flex;flex-direction:column;position:relative;}
-.header{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;padding:20px 16px 26px;position:relative;border-bottom-left-radius:24px;border-bottom-right-radius:24px;}
-.header h1{margin:0;font-size:20px;font-weight:700;}
-.header p{margin:6px 0 0;font-size:13px;opacity:.9;}
-.status-floating{position:absolute;top:16px;right:16px;background:var(--primary-soft);color:var(--primary);padding:12px 16px;border-radius:16px;font-size:12px;display:flex;flex-direction:column;align-items:flex-end;box-shadow:0 4px 12px rgba(0,0,0,.1);}
-.status-floating input{width:150px;margin-bottom:6px;padding:8px;border-radius:10px;border:1px solid #d1d5db;font-size:12px;}
-.status-floating button{padding:8px 12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;}
-.status-floating button:hover{background:#1e40af;}
-.status-floating p{margin:6px 0 0;font-size:12px;color:var(--sub);}
-.content{padding:20px;flex:1;}
-.step{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--sub);margin-bottom:12px;}
-.step span{width:26px;height:26px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.08);}
-.card{background:var(--card);border-radius:20px;padding:20px;margin-bottom:18px;box-shadow:0 12px 28px rgba(0,0,0,.08);transition:.3s;}
-.card:hover{box-shadow:0 14px 32px rgba(0,0,0,.12);}
-input,select,button{width:100%;padding:14px;border-radius:16px;border:1px solid #e5e7eb;margin-bottom:12px;font-size:14px;transition:.2s;}
-input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.2);}
-.toggle{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed #e5e7eb;transition:.2s;}
-.toggle:last-child{border-bottom:none;}
-.switch{position:relative;width:50px;height:26px;}
-.switch input{display:none;}
-.slider{position:absolute;inset:0;background:#d1d5db;border-radius:999px;transition:.3s;}
-.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
-.switch input:checked + .slider{background:var(--primary);} 
-.switch input:checked + .slider:before{transform:translateX(24px);} 
-.footer{position:sticky;bottom:0;background:#fff;border-top:1px solid #e5e7eb;padding:16px 18px;box-shadow:0 -4px 12px rgba(0,0,0,.05);} 
-.summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-weight:600;font-size:15px;} 
-button.action{background:var(--primary);color:#fff;font-size:16px;font-weight:700;border:none;padding:14px;border-radius:18px;cursor:pointer;transition:.3s;}
-button.action:hover{background:#1d4ed8;}
-.detail{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;}
-.softener-gallery{display:flex;gap:12px;margin-top:12px;}
-.softener-gallery img{width:84px;height:84px;border-radius:14px;object-fit:cover;border:2px solid #e5e7eb;cursor:pointer;transition:.3s;} 
-.softener-gallery img.active{border-color:var(--primary);transform:scale(1.08);}
-#washAlert{transition:.3s;}
+*{box-sizing:border-box}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif;
+  background:linear-gradient(180deg,#f8fafc,#eef2ff);
+  margin:0;
+  padding:12px;
+  color:var(--text)
+}
+.container{max-width:480px;margin:auto}
+.header{margin-bottom:16px}
+.header h1{margin:0;font-size:22px;font-weight:700}
+.header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
+.card h2{margin:0 0 12px;font-size:17px;font-weight:600}
+label{display:block;font-size:14px;margin:10px 0 6px;color:#374151}
+input,select,button{width:100%;padding:14px 14px;border-radius:14px;border:1px solid var(--border);font-size:16px}
+button{background:var(--primary);color:#fff;border:none;font-weight:600}
+button.secondary{background:#eef2ff;color:var(--primary)}
+.option{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 14px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  margin-bottom:10px;
+  background:#ffffff
+}
+.option label{display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--text)}
+.option small{font-size:12px;color:var(--muted)}
+.option input[type="checkbox"]{width:22px;height:22px;accent-color:var(--primary)}
+.price-box{background:#f8fafc;border:1px dashed var(--border);border-radius:14px;padding:14px}
+.price-box .total{font-size:22px;font-weight:700;color:var(--primary)}
+.muted{color:var(--muted);font-size:13px}
+.footer-action{position:sticky;bottom:0;background:#ffffff;padding:12px;border-top:1px solid var(--border)}
+.brand-grid,.scent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.brand-card,.scent-card{border:1px solid var(--border);border-radius:12px;padding:8px;text-align:center;font-size:13px;cursor:pointer}
+.brand-card.active,.scent-card.active{border-color:var(--primary);background:#eef2ff}
+.brand-card img{width:100%;height:60px;object-fit:contain}
 </style>
 </head>
 <body>
-<div class="app">
-
-<div class="header">
-  <h1>🧺 บริการซักผ้าเดลิเวอรี่</h1>
-  <p>สะดวก รวดเร็ว • ราคาชัดเจน • มืออาชีพ</p>
-
-  <div class="status-floating">
-    <input type="text" id="statusName" placeholder="ชื่อที่ใช้สั่ง">
-    <input type="tel" id="statusPhone" placeholder="เบอร์โทรศัพท์">
-    <button type="button" id="checkStatus">🔎 ตรวจสอบสถานะ</button>
-    <p id="orderStatus">สถานะ: —</p>
+<div class="container">
+  <div id="landing" class="card">
+    <h2>ยินดีต้อนรับ 👋</h2>
+    <p class="muted">กรุณาเลือกสิ่งที่ต้องการทำ</p>
+    <button id="goOrder" style="margin-top:12px">🧺 บริการรับ–ส่งซักผ้า</button>
+    <button id="goStatus" class="secondary" style="margin-top:10px">🔍 ตรวจสอบสถานะการซัก</button>
   </div>
-</div>
 
-<div class="content">
-  <div class="step"><span>1</span>วิธีซัก</div>
-  <div class="card">
-    <div class="toggle"><span>ซักรวม (มาตรฐาน)</span>
-      <label class="switch"><input type="radio" name="washType" value="รวม" checked><span class="slider"></span></label>
+  <div id="orderFlow" style="display:none">
+    <div class="header">
+      <h1>🧺 ซักผ้าเดลิเวอรี่</h1>
+      <p>กรอกข้อมูล → คำนวณราคา → บันทึกออเดอร์</p>
     </div>
-    <div class="toggle"><span>แยกสี (ปลอดภัยกว่า) +30 บาท</span>
-      <label class="switch"><input type="radio" name="washType" value="แยก"><span class="slider"></span></label>
-    </div>
-    <div id="washAlert" style="display:none;font-size:12px;color:var(--warning);background:#fef3c7;padding:10px;border-radius:12px;margin-top:10px;">⚠️ มีค่าบริการเพิ่มสำหรับการแยกสี เพื่อป้องกันสีตก</div>
-  </div>
 
-  <div class="step"><span>2</span>ข้อมูลลูกค้า</div>
-  <div class="card">
-    <input type="text" id="custName" placeholder="ชื่อ – นามสกุล">
-    <input type="tel" id="custPhone" placeholder="เบอร์โทรศัพท์">
-    <input type="text" id="custAddress" placeholder="ที่อยู่รับ–ส่ง">
-    <button type="button" id="getLocation">📍 รับพิกัดปัจจุบัน</button>
-    <input type="text" id="custLocation" placeholder="พิกัดรับ–ส่ง" readonly>
-    <input type="date" id="pickupDate" placeholder="วันรับผ้า">
-  </div>
-
-  <div class="step"><span>3</span>เลือกขนาดเครื่องซัก</div>
-  <div class="card">
-    <select id="machine">
-      <option value="" selected disabled>กรุณาเลือกขนาดเครื่องซัก</option>
-      <option value="40">เครื่องเล็ก (7–8 กก.) — 40 บาท</option>
-      <option value="60">เครื่องกลาง (10–12 กก.) — 60 บาท</option>
-      <option value="80">เครื่องใหญ่ (14–16 กก.) — 80 บาท</option>
-    </select>
-  </div>
-
-  <div class="step" id="serviceStep" style="display:none;"><span>4</span>บริการเพิ่มเติม</div>
-  <div class="card" id="extraServices" style="display:none;">
-    <div class="toggle"><span id="ironLabel">รีด</span><label class="switch"><input type="checkbox" id="iron"><span class="slider"></span></label></div>
-    <div class="toggle"><span>ซักด่วน (+40%)</span><label class="switch"><input type="checkbox" id="express"><span class="slider"></span></label></div>
-    <div class="toggle"><span>น้ำยาปรับผ้านุ่ม (+10)</span><label class="switch"><input type="checkbox" id="perfume"><span class="slider"></span></label></div>
-    <div id="softenerOptions" style="display:none;padding:10px 0 0 0;">
-      <select id="softenerBrand">
-        <option value="">เลือกยี่ห้อ</option>
-        <option value="Downy">Downy</option>
-        <option value="Comfort">Comfort</option>
-        <option value="Breeze">Breeze</option>
-      </select>
-      <select id="softenerScent">
-        <option value="">เลือกกลิ่น</option>
-        <option value="ซากุระ">ซากุระ</option>
-        <option value="ลาเวนเดอร์">ลาเวนเดอร์</option>
-        <option value="ฟลอรัล">ฟลอรัล</option>
-        <option value="ไร้กลิ่น">ไร้กลิ่น</option>
+    <div class="card">
+      <h2>1. เลือกบริการซัก</h2>
+      <select id="washType">
+        <option value="รวม">ซักรวม (มาตรฐาน)</option>
+        <option value="แยกสี">แยกสี (คิดเพิ่มตามขนาดเครื่อง)</option>
       </select>
     </div>
-    <div class="toggle"><span>พับผ้า (+20)</span><label class="switch"><input type="checkbox" id="fold"><span class="slider"></span></label></div>
-    <div class="toggle"><span>รับ–ส่งด่วน (+30)</span><label class="switch"><input type="checkbox" id="deliveryFast"><span class="slider"></span></label></div>
+
+    <div class="card">
+      <h2>2. ข้อมูลลูกค้า</h2>
+      <label>ชื่อ</label><input id="name" />
+      <label>เบอร์โทร</label><input id="phone" />
+      <label>ที่อยู่</label><input id="address" />
+      <label>วันที่รับผ้า</label><input type="date" id="pickup_date" />
+    </div>
+
+    <div class="card">
+      <h2>4. ขนาดเครื่องซัก</h2>
+      <select id="machine">
+        <option value="เล็ก">เล็ก (80 บาท)</option>
+        <option value="กลาง">กลาง (120 บาท)</option>
+        <option value="ใหญ่">ใหญ่ (160 บาท)</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2>5. บริการเสริม</h2>
+      <label class="option"><div>น้ำยาปรับผ้านุ่ม<br><small class="muted">เล็ก 10 • กลาง 20 • ใหญ่ 30 บาท</small></div><input type="checkbox" id="softener" /></label>
+      <div id="softenerUI" style="display:none;margin-top:12px">
+        <h3 style="font-size:15px;margin-bottom:6px">เลือกยี่ห้อ</h3>
+        <div class="brand-grid">
+          <div class="brand-card" data-brand="Downy"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Downy_fabric_softener_bottle.png" alt="Downy"><div>Downy</div></div>
+          <div class="brand-card" data-brand="Comfort"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Comfort_fabric_conditioner.png" alt="Comfort"><div>Comfort</div></div>
+          <div class="brand-card" data-brand="Hygiene"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9c/Hygiene_fabric_softener.png" alt="Hygiene"><div>Hygiene</div></div>
+        </div>
+        <h3 style="font-size:15px;margin:12px 0 6px">เลือกกลิ่น</h3>
+        <div class="scent-grid">
+          <div class="scent-card" data-scent="Lavender"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Lavender_flower.jpg" style="width:100%;height:50px;object-fit:cover;border-radius:8px"><div>Lavender</div></div>
+          <div class="scent-card" data-scent="Rose"><img src="https://upload.wikimedia.org/wikipedia/commons/b/bf/Rose_flower.jpg" style="width:100%;height:50px;object-fit:cover;border-radius:8px"><div>Rose</div></div>
+          <div class="scent-card" data-scent="Fresh"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Fresh_linen.jpg" style="width:100%;height:50px;object-fit:cover;border-radius:8px"><div>Fresh</div></div>
+        </div>
+        <div id="softenerPreview" class="muted" style="margin-top:8px"></div>
+      </div>
+      <label class="option"><div>รีดผ้า<br><small class="muted">เล็ก 30 • กลาง 40 • ใหญ่ 50 บาท</small></div><input type="checkbox" id="iron" /></label>
+      <label class="option"><div>พับผ้า<br><small class="muted">เล็ก 20 • กลาง 30 • ใหญ่ 40 บาท</small></div><input type="checkbox" id="fold" /></label>
+      <label class="option"><div>รับ–ส่งด่วน<br><small class="muted">เล็ก 40 • กลาง 60 • ใหญ่ 80 บาท</small></div><input type="checkbox" id="fastDelivery" /></label>
+    </div>
+
+    <div class="card" id="summaryCard">
+      <h2>6. สรุปราคา</h2>
+      <div class="price-box">
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:6px 0;border-bottom:1px dashed var(--border)">รายการ</th>
+              <th style="text-align:right;padding:6px 0;border-bottom:1px dashed var(--border)">ราคา (บาท)</th>
+            </tr>
+          </thead>
+          <tbody id="priceDetail"></tbody>
+          <tbody id="extraSubtotal"></tbody>
+        </table>
+        <div class="total" style="margin-top:10px">รวมทั้งหมด <span id="total">0</span> บาท</div>
+      </div>
+    </div>
+
+    <div class="footer-action" id="footerAction">
+      <button id="btnSubmit">✅ บันทึกออเดอร์</button>
+    </div>
   </div>
-</div>
 
-<div class="footer">
-  <div class="summary"><span>ราคารวม (รวมค่าส่ง 20 บาท)</span><strong id="result">—</strong></div>
-  <button class="action" onclick="calculate()">ยืนยัน & คำนวณราคา</button>
-  <div class="detail" id="priceDetail"></div>
-</div>
-
+  <div id="statusFlow" class="card" style="display:none">
+    <button id="backFromStatus" class="secondary" style="margin-bottom:10px">← กลับ</button>
+    <h2>ตรวจสอบสถานะ</h2>
+    <label>เบอร์โทรศัพท์</label>
+    <input id="statusPhone" />
+    <button id="btnCheckStatus" style="margin-top:12px">ตรวจสอบสถานะ</button>
+  </div>
 </div>
 
 <script>
-function getIronPrice(m){return m===40?30:m===60?40:m===80?50:30;}
-function updateIronLabel(){const m=parseFloat(machine.value)||0;const p=getIronPrice(m);ironLabel.innerText=p?`รีด (+${p})`:'รีด';}
-document.querySelectorAll('input[name="washType"]').forEach(r=>{r.addEventListener('change',()=>{washAlert.style.display=r.value==='แยก'?'block':'none';});});
-machine.addEventListener('change',()=>{updateIronLabel();extraServices.style.display='block';serviceStep.style.display='flex';});
-perfume.addEventListener('change',()=>{softenerOptions.style.display=perfume.checked?'block':'none';});
-document.querySelectorAll('.softener-gallery img').forEach(img=>{img.addEventListener('click',()=>{document.querySelectorAll('.softener-gallery img').forEach(i=>i.classList.remove('active'));img.classList.add('active');softenerBrand.value=img.dataset.brand;});});
-getLocation.addEventListener('click',()=>{if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{custLocation.value=`${pos.coords.latitude},${pos.coords.longitude}`;},err=>{alert('ไม่สามารถรับพิกัดได้');});} else { alert('อุปกรณ์ของคุณไม่รองรับการระบุตำแหน่ง'); }});
+(function(){
+  const goOrder=document.getElementById('goOrder');
+  const goStatus=document.getElementById('goStatus');
+  const backFromStatus=document.getElementById('backFromStatus');
+  const landing=document.getElementById('landing');
+  const orderFlow=document.getElementById('orderFlow');
+  const statusFlow=document.getElementById('statusFlow');
 
-function calculate(){
-  if(!custName.value||!custPhone.value||!custAddress.value||!pickupDate.value){alert('กรุณากรอกข้อมูลลูกค้าให้ครบถ้วน');return;}
-  if(!machine.value){alert('กรุณาเลือกขนาดเครื่องซัก');return;}
-  const m=parseFloat(machine.value);
-  let total=0;
-  let d=[];
-  total+=m; d.push(`เครื่องซัก ${m}`);
-  total+=20; d.push('ค่าส่ง +20');
-  if(document.querySelector('input[name="washType"]:checked').value==='แยก'){total+=30;d.push('แยกสี +30');}
-  if(iron.checked){const p=getIronPrice(m);total+=p;d.push(`รีด +${p}`);}
-  if(perfume.checked){total+=10;const b=softenerBrand.value||'ไม่ระบุยี่ห้อ';const s=softenerScent.value||'ไม่ระบุกลิ่น';d.push(`น้ำยาปรับผ้านุ่ม +10 (${b} • ${s})`);}
-  if(fold.checked){total+=20;d.push('พับผ้า +20');}
-  if(deliveryFast.checked){total+=30;d.push('รับ–ส่งด่วน +30');}
-  if(express.checked){total*=1.4;d.push('ซักด่วน +40%');}
-  result.innerText=`฿${total.toFixed(0)}`;
-  priceDetail.innerText=`👤 ${custName.value} | 📞 ${custPhone.value} | 📍 ${custLocation.value} | 📅 ${pickupDate.value}
-`+d.join(' • ');
-}
+  goOrder.onclick=()=>{landing.style.display='none';orderFlow.style.display='block';calc();};
+  goStatus.onclick=()=>{landing.style.display='none';statusFlow.style.display='block'};
+  backFromStatus.onclick=()=>{statusFlow.style.display='none';landing.style.display='block'};
 
-checkStatus.addEventListener('click',()=>{
-  const name=statusName.value.trim();
-  const phone=statusPhone.value.trim();
-  if(!name||!phone){alert('กรุณากรอกชื่อและเบอร์โทรเพื่อเช็คสถานะ');return;}
-  const statuses = ['รอรับผ้า', 'กำลังซัก', 'ซักเสร็จ', 'จัดส่ง', 'ส่งถึงลูกค้า'];
-  const randomStatus = statuses[Math.floor(Math.random()*statuses.length)];
-  orderStatus.innerText = `สถานะออเดอร์ของ ${name} (${phone}): ${randomStatus}`;
-});
+  const prices={machine:{เล็ก:80,กลาง:120,ใหญ่:160}};
+  const washTypeEl=document.getElementById('washType');
+  const machineSel=document.getElementById('machine');
+  const softener=document.getElementById('softener');
+  const softenerUI=document.getElementById('softenerUI');
+  const preview=document.getElementById('softenerPreview');
+  let softenerBrand=null,softenerScent=null;
+  const iron=document.getElementById('iron');
+  const fold=document.getElementById('fold');
+  const fastDelivery=document.getElementById('fastDelivery');
+  const priceDetail=document.getElementById('priceDetail');
+  const totalEl=document.getElementById('total');
+
+  softener.onchange=()=>{softenerUI.style.display=softener.checked?'block':'none';calc();};
+
+  document.querySelectorAll('.brand-card').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.brand-card').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');softenerBrand=b.dataset.brand;updatePreview();calc();
+  });
+  document.querySelectorAll('.scent-card').forEach(s=>s.onclick=()=>{
+    document.querySelectorAll('.scent-card').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');softenerScent=s.dataset.scent;updatePreview();calc();
+  });
+  function updatePreview(){
+    preview.textContent=softenerBrand&&softenerScent?`เลือก ${softenerBrand} - ${softenerScent}`:'';
+  }
+
+  function calc(){
+    let total=0;const d=[];
+    const size=machineSel.value;
+    total+=prices.machine[size];
+    d.push(`ค่าซัก ${prices.machine[size]}`);
+
+    if(washTypeEl.value==='แยกสี'){
+      const s={เล็ก:20,กลาง:30,ใหญ่:40}[size];
+      total+=s;d.push(`แยกสี ${s}`)
+    }
+    if(softener.checked){const so={เล็ก:10,กลาง:20,ใหญ่:30}[size];total+=so;d.push(`น้ำยาปรับผ้านุ่ม ${so}`)}
+    if(iron.checked){const p={เล็ก:30,กลาง:40,ใหญ่:50}[size];total+=p;d.push(`รีดผ้า ${p}`)}
+    if(fold.checked){const f={เล็ก:20,กลาง:30,ใหญ่:40}[size];total+=f;d.push(`พับผ้า ${f}`)}
+    if(fastDelivery.checked){const e={เล็ก:40,กลาง:60,ใหญ่:80}[size];total+=e;d.push(`รับ–ส่งด่วน ${e}`)}
+
+    let extraSum=0;
+    priceDetail.innerHTML = d.map(row=>{
+      const parts=row.split(' ');
+      const price=parseInt(parts.pop(),10);
+      const label=parts.join(' ');
+      if(label!=='ค่าซัก') extraSum+=price;
+      return `<tr><td style="padding:4px 0">${label} (${size})</td><td style="text-align:right">${price}</td></tr>`;
+    }).join('');
+    document.getElementById('extraSubtotal').innerHTML = extraSum>0
+      ? `<tr><td style=\"padding-top:6px;border-top:1px dashed var(--border)\">รวมบริการเสริม</td><td style=\"text-align:right;border-top:1px dashed var(--border)\">${extraSum}</td></tr>`
+      : '';
+    totalEl.textContent=total;
+  }
+
+  document.querySelectorAll('input,select').forEach(el=>el.addEventListener('change',calc));
+})();
 </script>
 </body>
 </html>
