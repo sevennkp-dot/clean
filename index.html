@@ -307,7 +307,8 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
     btnSubmit.onclick = async ()=>{
       const payload = {
         order_id: orderId,
-        order_time: new Date(),
+        // ใช้เวลา server จาก Supabase (created_at)
+        // ไม่ส่ง order_time จาก client
         name: document.getElementById('name').value,
         phone: document.getElementById('phone').value,
         address: document.getElementById('address').value,
@@ -327,12 +328,12 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
         status: 'รับออเดอร์'
       };
 
-      const { error } = await sb.from('orders').insert([payload]);
+      const { data, error } = await sb.from('orders').insert([payload]);
       if(error){
-        alert('❌ บันทึกออเดอร์ไม่สำเร็จ');
         console.error(error);
+        alert(`❌ บันทึกออเดอร์ไม่สำเร็จ\n${error.message || JSON.stringify(error)}`);
       }else{
-        alert('✅ บันทึกออเดอร์เรียบร้อย\nเลขออเดอร์: '+orderId);
+        alert(`✅ บันทึกออเดอร์เรียบร้อย\nเลขออเดอร์: ${orderId}`);
       }
     }
   }
