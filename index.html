@@ -331,9 +331,11 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
       const { data, error } = await sb.from('orders').insert([payload]);
       if(error){
         console.error(error);
-        alert(`❌ บันทึกออเดอร์ไม่สำเร็จ\n${error.message || JSON.stringify(error)}`);
+        alert(`❌ บันทึกออเดอร์ไม่สำเร็จ
+${error.message || JSON.stringify(error)}`);
       }else{
-        alert(`✅ บันทึกออเดอร์เรียบร้อย\nเลขออเดอร์: ${orderId}`);
+        alert(`✅ บันทึกออเดอร์เรียบร้อย
+เลขออเดอร์: ${orderId}`);
       }
     }
   }
