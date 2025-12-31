@@ -169,12 +169,15 @@ button.secondary{background:#eef2ff;color:var(--primary)}
     </div>
   </div>
 
-  <div id="statusFlow" class="card" style="display:none">
-    <button id="backFromStatus" class="secondary" style="margin-bottom:10px">← กลับ</button>
-    <h2>ตรวจสอบสถานะ</h2>
-    <label>เบอร์โทรศัพท์</label>
-    <input id="statusPhone" />
-    <button id="btnCheckStatus" style="margin-top:12px">ตรวจสอบสถานะ</button>
+  <div id="statusFlow" style="display:none">
+    <div class="card">
+      <h2>🔍 ตรวจสอบสถานะการซัก</h2>
+      <label>เบอร์โทรศัพท์</label>
+      <input id="statusPhone" placeholder="กรอกเบอร์โทรศัพท์" />
+      <button id="btnCheckStatus" style="margin-top:12px">ตรวจสอบสถานะ</button>
+      <button id="backFromStatus" class="secondary" style="margin-top:10px">← กลับ</button>
+    </div>
+    <div id="statusResults" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -379,34 +382,45 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
   }
 
   // ===============================
-  // CHECK STATUS BY PHONE
-  // ===============================
-  const btnCheckStatus = document.getElementById('btnCheckStatus');
-  if(btnCheckStatus){
-    btnCheckStatus.onclick = async ()=>{
-      const phone = document.getElementById('statusPhone').value.replace(/\D/g,'');
-      const { data, error } = await sb
-        .from('orders')
-        .select('order_id,status,total_price,created_at')
-        .eq('phone', phone)
-        .order('created_at', { ascending:false })
-        .limit(1);
+// CHECK STATUS BY PHONE (MULTI ORDERS + CARD)
+// ===============================
+const btnCheckStatus = document.getElementById('btnCheckStatus');
+const statusResults = document.getElementById('statusResults');
 
-      if(error || !data || !data.length){
-        alert('ไม่พบออเดอร์');
-        return;
-      }
-      const o = data[0];
-      alert(
-        `เลขออเดอร์: ${o.order_id}\n`+
-        `สถานะ: ${o.status}\n`+
-        `ยอดรวม: ${o.total_price} บาท`
-      );
+if (btnCheckStatus) {
+  btnCheckStatus.onclick = async () => {
+    const phone = document
+      .getElementById('statusPhone')
+      .value.replace(/\D/g, '');
+
+    statusResults.innerHTML =
+      '<div class="muted">กำลังค้นหาออเดอร์...</div>';
+
+    const { data, error } = await sb
+      .from('orders')
+      .select('order_id,status,total_price,created_at')
+      .eq('phone', phone)
+      .neq('status', 'เสร็จสิ้น')
+      .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      statusResults.innerHTML =
+        '<div class="muted">ไม่พบออเดอร์ที่ยังไม่เสร็จสิ้น</div>';
+      return;
     }
-  }
+
+    statusResults.innerHTML = data.map(o => `
+      <div class="card">
+        <h3 style="margin:0 0 6px">🧾 ${o.order_id}</h3>
+        <div class="muted">สถานะ: <b>${o.status}</b></div>
+        <div class="muted">ยอดรวม: ${o.total_price} บาท</div>
+      </div>
+    `).join('');
+  };
+}
+
 })();
 </script>
 </body>
 </html>
-
 
