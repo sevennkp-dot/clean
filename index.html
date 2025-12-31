@@ -340,7 +340,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
     const payload = {
       order_id: orderId,
       name: document.getElementById('name').value,
-      phone: document.getElementById('phone').value.trim(),
+      phone: document.getElementById('phone').value.replace(/\\D/g,''),
       address: document.getElementById('address').value,
       lat: document.getElementById('lat').value || null,
       lng: document.getElementById('lng').value || null,
@@ -354,9 +354,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
       iron: iron.checked,
       fold: fold.checked,
       fast_delivery: fastDelivery.checked,
-      total_price: parseInt(totalEl.textContent,10),
-      order_time: new Date().toISOString(),
-      status: 'รับออเดอร์'
+      total_price: parseInt(totalEl.textContent,10),      status: 'รับออเดอร์'
     };
 
     const { error } = await sb.from('orders').insert([payload]);
@@ -382,7 +380,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
   const btnCheckStatus = document.getElementById('btnCheckStatus');
   if(btnCheckStatus){
     btnCheckStatus.onclick = async ()=>{
-      const phone = document.getElementById('statusPhone').value.trim();
+      const phone = document.getElementById('statusPhone').value.replace(/\\D/g,'');
       const { data, error } = await sb
         .from('orders')
         .select('order_id,status,total_price,created_at')
