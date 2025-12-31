@@ -389,9 +389,8 @@ const statusResults = document.getElementById('statusResults');
 
 if (btnCheckStatus) {
   btnCheckStatus.onclick = async () => {
-    const phone = document
-      .getElementById('statusPhone')
-      .value.replace(/\D/g, '');
+    const statusPhoneInput = document.getElementById('statusPhone');
+    const phone = statusPhoneInput.value.replace(/\D/g, '');
 
     statusResults.innerHTML =
       '<div class="muted">กำลังค้นหาออเดอร์...</div>';
@@ -408,6 +407,9 @@ if (btnCheckStatus) {
         '<div class="muted">ไม่พบออเดอร์ที่ยังไม่เสร็จสิ้น</div>';
       return;
     }
+
+        // เคลียร์ช่องเบอร์หลังจากกดตรวจสอบ
+    statusPhoneInput.value = '';
 
     statusResults.innerHTML = data.map(o => `
       <div class="card">
