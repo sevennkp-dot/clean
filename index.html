@@ -340,7 +340,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
     const payload = {
       order_id: orderId,
       name: document.getElementById('name').value,
-      phone: document.getElementById('phone').value,
+      phone: document.getElementById('phone').value.trim(),
       address: document.getElementById('address').value,
       lat: document.getElementById('lat').value || null,
       lng: document.getElementById('lng').value || null,
@@ -355,6 +355,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
       fold: fold.checked,
       fast_delivery: fastDelivery.checked,
       total_price: parseInt(totalEl.textContent,10),
+      order_time: new Date().toISOString(),
       status: 'รับออเดอร์'
     };
 
@@ -381,10 +382,10 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
   const btnCheckStatus = document.getElementById('btnCheckStatus');
   if(btnCheckStatus){
     btnCheckStatus.onclick = async ()=>{
-      const phone = document.getElementById('statusPhone').value;
+      const phone = document.getElementById('statusPhone').value.trim();
       const { data, error } = await sb
         .from('orders')
-        .select('order_id,status,total_price,order_time')
+        .select('order_id,status,total_price,created_at')
         .eq('phone', phone)
         .order('created_at', { ascending:false })
         .limit(1);
@@ -405,5 +406,4 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
 </script>
 </body>
 </html>
-
 
