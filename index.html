@@ -340,7 +340,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
     const payload = {
       order_id: orderId,
       name: document.getElementById('name').value,
-      phone: document.getElementById('phone').value.replace(/\\D/g,''),
+      phone: document.getElementById('phone').value.replace(/\D/g,''),
       address: document.getElementById('address').value,
       lat: document.getElementById('lat').value || null,
       lng: document.getElementById('lng').value || null,
@@ -380,7 +380,7 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
   const btnCheckStatus = document.getElementById('btnCheckStatus');
   if(btnCheckStatus){
     btnCheckStatus.onclick = async ()=>{
-      const phone = document.getElementById('statusPhone').value.replace(/\\D/g,'');
+      const phone = document.getElementById('statusPhone').value.replace(/\D/g,'');
       const { data, error } = await sb
         .from('orders')
         .select('order_id,status,total_price,created_at')
@@ -393,11 +393,24 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
         return;
       }
       const o = data[0];
+      // แปลงเวลาเป็นเวลาประเทศไทย
+      const thTime = new Date(o.created_at).toLocaleString('th-TH', {
+        timeZone: 'Asia/Bangkok',
+        dateStyle: 'short',
+        timeStyle: 'short'
+      });
+
       alert(
-        `เลขออเดอร์: ${o.order_id}\n`+
-        `สถานะ: ${o.status}\n`+
-        `ยอดรวม: ${o.total_price} บาท`
+        `เลขออเดอร์: ${o.order_id}
+`+
+        `สถานะ: ${o.status}
+`+
+        `ยอดรวม: ${o.total_price} บาท
+`+
+        `เวลา: ${thTime} น.`
       );
+      // เคลียร์ช่องเบอร์โทรหลังตรวจสอบ
+      document.getElementById('statusPhone').value = '';
     }
   }
 })();
