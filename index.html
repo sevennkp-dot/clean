@@ -223,8 +223,12 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
     return `WASH-${y}${m}${day}-${t}`;
   }
   function formatDateTime(){
-    const d=new Date();
-    return d.toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
+    // แสดงเวลาไทม์โซนประเทศไทย (Asia/Bangkok)
+    return new Date().toLocaleString('th-TH',{
+      timeZone:'Asia/Bangkok',
+      dateStyle:'short',
+      timeStyle:'short'
+    });
   }
   const orderId=generateOrderId();
   const orderTime=formatDateTime();
@@ -393,24 +397,11 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
         return;
       }
       const o = data[0];
-      // แปลงเวลาเป็นเวลาประเทศไทย
-      const thTime = new Date(o.created_at).toLocaleString('th-TH', {
-        timeZone: 'Asia/Bangkok',
-        dateStyle: 'short',
-        timeStyle: 'short'
-      });
-
       alert(
-        `เลขออเดอร์: ${o.order_id}
-`+
-        `สถานะ: ${o.status}
-`+
-        `ยอดรวม: ${o.total_price} บาท
-`+
-        `เวลา: ${thTime} น.`
+        `เลขออเดอร์: ${o.order_id}\n`+
+        `สถานะ: ${o.status}\n`+
+        `ยอดรวม: ${o.total_price} บาท`
       );
-      // เคลียร์ช่องเบอร์โทรหลังตรวจสอบ
-      document.getElementById('statusPhone').value = '';
     }
   }
 })();
@@ -418,3 +409,4 @@ const sb = window.__sb || (window.__sb = window.supabase.createClient(
 </body>
 </html>
 
+โฆฏโ
